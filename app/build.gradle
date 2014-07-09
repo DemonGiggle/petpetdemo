@@ -1,8 +1,9 @@
 apply plugin: 'android'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.1.0"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
 
     defaultConfig {
         applicationId "com.zillians.petcamdemo"
@@ -21,4 +22,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':library:third_party:EasyCamera')
+    compile files('libs/android-async-http-1.4.5-20140329.151824-5.jar')
 }
