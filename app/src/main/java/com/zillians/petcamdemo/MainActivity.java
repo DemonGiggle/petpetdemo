@@ -1,6 +1,10 @@
 package com.zillians.petcamdemo;
 
 import android.app.Activity;
+import android.content.res.Configuration;
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Environment;
@@ -17,6 +21,7 @@ import com.easycamera.EasyCamera;
 
 import org.apache.http.HttpException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -79,6 +84,17 @@ public class MainActivity extends Activity {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             try {
+                Camera.Parameters parameters = camera.getParameters();
+                if (getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                    parameters.set("orientation", "portrait");
+                    camera.setDisplayOrientation(90);
+                    parameters.setRotation(90);
+                } else {
+                    parameters.set("orientation", "landscape");
+                    camera.setDisplayOrientation(0);
+                    parameters.setRotation(0);
+                }
+
                 camera.startPreview(holder);
                 camera.setPreviewCallback(cameraPreviewCallback);
             } catch (IOException e) {
@@ -97,6 +113,32 @@ public class MainActivity extends Activity {
         }
     };
 
+    private void writeToJpeg(File outputImage, byte[] data) {
+        try {
+            Camera.Parameters parameters = camera.getParameters();
+            Camera.Size size = parameters.getPreviewSize();
+
+            YuvImage image = new YuvImage(data, ImageFormat.NV21,
+                    size.width, size.height, null);
+            Rect rectangle = new Rect();
+            rectangle.bottom = size.height;
+            rectangle.top = 0;
+            rectangle.left = 0;
+            rectangle.right = size.width;
+            ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+            image.compressToJpeg(rectangle, 90, out2);
+
+            FileOutputStream fos = new FileOutputStream(outputImage);
+            fos.write(out2.toByteArray());
+            fos.close();
+            Log.d(TAG, "Write image complete: " + outputImage.toString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private Camera.PreviewCallback cameraPreviewCallback = new Camera.PreviewCallback() {
 
         private long lastTimeCapture = 0;
@@ -112,16 +154,8 @@ public class MainActivity extends Activity {
 
                 captureCount++;
                 final File outputImage = new File(appFolder, captureCount + ".jpg");
-                try {
-                    FileOutputStream fos = new FileOutputStream(outputImage);
-                    fos.write(data);
-                    fos.close();
-                    Log.d(TAG, "Write image complete: " + outputImage.toString());
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+
+                writeToJpeg(outputImage, data);
 
                 boolean result = queue.offer(new Runnable() {
 
