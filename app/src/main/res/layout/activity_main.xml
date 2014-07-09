@@ -10,16 +10,41 @@
         android:layout_height="match_parent" />
 
     <TextView
-        style="?android:attr/textAppearanceMedium"
-        android:id="@+id/name"
+        android:id="@+id/meow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:background="@android:color/black"
         android:textColor="@android:color/white"
         android:padding="8dp"
-        android:text="Identifying ... "/>
+        android:textSize="8sp"
+        android:text="Meow"/>
+
+    <TextView
+        android:id="@+id/chacha"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/meow"
+        android:layout_below="@id/meow"
+        android:background="@android:color/black"
+        android:textColor="@android:color/white"
+        android:padding="8dp"
+        android:textSize="8sp"
+        android:text="Cha Cha"/>
+
+    <TextView
+        android:id="@+id/background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/chacha"
+        android:layout_below="@id/chacha"
+        android:background="@android:color/black"
+        android:textColor="@android:color/white"
+        android:padding="8dp"
+        android:textSize="8sp"
+        android:text="Background"/>
 
 </RelativeLayout>
