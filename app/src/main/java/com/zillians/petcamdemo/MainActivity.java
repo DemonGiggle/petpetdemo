@@ -157,7 +157,7 @@ public class MainActivity extends Activity {
 
                 writeToJpeg(outputImage, data);
 
-                boolean result = queue.offer(new Runnable() {
+                executor.submit(new Runnable() {
 
                     @Override
                     public void run() {
@@ -183,8 +183,6 @@ public class MainActivity extends Activity {
                         }
                     }
                 });
-
-                Log.d(TAG, "Put task to upload thread result: " + result);
             }
         }
     };
