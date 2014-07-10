@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
         surface = (SurfaceView) findViewById(R.id.preview);
         name = (TextView) findViewById(R.id.name);
 
-        camera = DefaultEasyCamera.open(1);
+        camera = DefaultEasyCamera.open();
 
         surface.getHolder().addCallback(previewCallback);
     }
