@@ -26,8 +26,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -39,7 +37,7 @@ public class MainActivity extends Activity {
 
     EasyCamera camera;
     SurfaceView surface;
-    Map<String, TextView> nameMap = new HashMap<String, TextView>();
+    TextView name;
 
     BlockingQueue<Runnable> queue;
     ThreadPoolExecutor executor;
@@ -61,9 +59,7 @@ public class MainActivity extends Activity {
         executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, queue);
 
         surface = (SurfaceView) findViewById(R.id.preview);
-        nameMap.put("meow", (TextView) findViewById(R.id.meow));
-        nameMap.put("chacha", (TextView) findViewById(R.id.chacha));
-        nameMap.put("background", (TextView) findViewById(R.id.background));
+        name = (TextView) findViewById(R.id.name);
 
         camera = DefaultEasyCamera.open(1);
 
@@ -160,7 +156,8 @@ public class MainActivity extends Activity {
                 final File outputImage = new File(appFolder, captureCount + ".jpg");
 
                 writeToJpeg(outputImage, data);
-                executor.submit(new Runnable() {
+
+                boolean result = queue.offer(new Runnable() {
 
                     @Override
                     public void run() {
@@ -173,7 +170,9 @@ public class MainActivity extends Activity {
 
                                 @Override
                                 public void run() {
-                                    updateNameTextView(tags);
+                                    if (tags.length >= 1) {
+                                        name.setText(tags[0].getTag());
+                                    }
                                 }
                             });
 
@@ -184,22 +183,11 @@ public class MainActivity extends Activity {
                         }
                     }
                 });
+
+                Log.d(TAG, "Put task to upload thread result: " + result);
             }
         }
     };
-
-    private void updateNameTextView(ImageAnalysisService.Tag[] tags) {
-        final int maxTextSize = 42;
-        final int minTextSize = 8;
-
-        for (ImageAnalysisService.Tag tag : tags) {
-            final TextView name = nameMap.get(tag.getTag().toLowerCase());
-            float textSize = (float)tag.getConfidence() * maxTextSize;
-
-            textSize = textSize < minTextSize ? minTextSize : textSize;
-            name.setTextSize(textSize);
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
