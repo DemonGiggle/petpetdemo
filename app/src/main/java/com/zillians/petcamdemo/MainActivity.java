@@ -28,8 +28,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
         initFolder();
 
         handler = new Handler();
-        queue = new ArrayBlockingQueue<Runnable>(10);
+        queue = new LinkedBlockingQueue<Runnable>();
         executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, queue);
 
         surface = (SurfaceView) findViewById(R.id.preview);
