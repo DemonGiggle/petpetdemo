@@ -33,13 +33,22 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+class ActionWrapper {
+    TextView textView;
+    Runnable action;
+
+    ActionWrapper(TextView textView, Runnable action) {
+        this.textView = textView;
+        this.action = action;
+    }
+}
 
 public class MainActivity extends Activity {
     private static final String TAG = "PetcamDemo";
 
     EasyCamera camera;
     SurfaceView surface;
-    Map<String, TextView> nameMap = new HashMap<String, TextView>();
+    Map<String, ActionWrapper> actionMap = new HashMap<String, ActionWrapper>();
 
     BlockingQueue<Runnable> queue;
     ThreadPoolExecutor executor;
@@ -62,14 +71,35 @@ public class MainActivity extends Activity {
         executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, queue);
 
         surface = (SurfaceView) findViewById(R.id.preview);
-        nameMap.put("meow", (TextView) findViewById(R.id.meow));
-        nameMap.put("chacha", (TextView) findViewById(R.id.chacha));
-        nameMap.put("background", (TextView) findViewById(R.id.background));
+        actionMap.put("meow", new ActionWrapper((TextView) findViewById(R.id.meow), meowAction));
+        actionMap.put("chacha", new ActionWrapper((TextView) findViewById(R.id.chacha), chachaAction));
+        actionMap.put("background", new ActionWrapper((TextView) findViewById(R.id.background), backgroundAction));
 
         camera = DefaultEasyCamera.open(1);
 
         surface.getHolder().addCallback(previewCallback);
     }
+
+    private Runnable meowAction = new Runnable() {
+        @Override
+        public void run() {
+
+        }
+    };
+
+    private Runnable chachaAction = new Runnable() {
+        @Override
+        public void run() {
+
+        }
+    };
+
+    private Runnable backgroundAction = new Runnable() {
+        @Override
+        public void run() {
+
+        }
+    };
 
     private void initFolder() {
         appFolder = new File(Environment.getExternalStorageDirectory(), "petcamdemo");
@@ -195,13 +225,22 @@ public class MainActivity extends Activity {
         final int maxTextSize = 42;
         final int minTextSize = 8;
 
+        float maxConfidence = 0;
+        Runnable actionToTake = null;
         for (ImageAnalysisService.Tag tag : tags) {
-            final TextView name = nameMap.get(tag.getTag().toLowerCase());
+            final ActionWrapper actionWrapper = actionMap.get(tag.getTag().toLowerCase());
+            final TextView name = actionWrapper.textView;
             float textSize = (float)tag.getConfidence() * maxTextSize;
 
             textSize = textSize < minTextSize ? minTextSize : textSize;
             name.setTextSize(textSize);
+
+            if (tag.getConfidence() > maxConfidence) {
+                actionToTake = actionWrapper.action;
+            }
         }
+
+        actionToTake.run();
     }
 
     @Override
