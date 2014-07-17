@@ -6,6 +6,8 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -59,11 +61,18 @@ public class MainActivity extends Activity {
     Handler handler;
     File outputImage ;
 
+    SoundPool soundPool;
+    int negativeSound;
+    int positiveSound;
+
+    Runnable currentAction;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initSoundPool();
         initFolder();
 
         handler = new Handler();
@@ -80,24 +89,36 @@ public class MainActivity extends Activity {
         surface.getHolder().addCallback(previewCallback);
     }
 
+    private void initSoundPool() {
+        soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 3);
+        negativeSound = soundPool.load(this, R.raw.negative, 1);
+        positiveSound = soundPool.load(this, R.raw.positive, 2);
+    }
+
     private Runnable meowAction = new Runnable() {
         @Override
         public void run() {
-
+            if (currentAction != meowAction) {
+                soundPool.play(positiveSound, 1.0f, 1.0f, 0, 0, 1.0f);
+                currentAction = meowAction;
+            }
         }
     };
 
     private Runnable chachaAction = new Runnable() {
         @Override
         public void run() {
-
+            if (currentAction != chachaAction) {
+                soundPool.play(negativeSound, 1.0f, 1.0f, 0, 0, 1.0f);
+                currentAction = chachaAction;
+            }
         }
     };
 
     private Runnable backgroundAction = new Runnable() {
         @Override
         public void run() {
-
+            currentAction = backgroundAction;
         }
     };
 
