@@ -121,6 +121,7 @@ public class MainActivity extends Activity {
         @Override
         public void run() {
             if (currentAction != meowAction) {
+                Log.d(TAG, "[tag] meow action");
                 soundPool.play(positiveSound, 1.0f, 1.0f, 0, 0, 1.0f);
                 currentAction = meowAction;
 
@@ -138,7 +139,8 @@ public class MainActivity extends Activity {
         @Override
         public void run() {
             if (currentAction != chachaAction) {
-                soundPool.play(negativeSound, 1.0f, 1.0f, 0, 0, 1.0f);
+                Log.d(TAG, "[tag] chacha action");
+                soundPool.play(negativeSound, 1.0f, 1.0f, 0, 0, 1.5f);
                 currentAction = chachaAction;
 
                 alert.setText("WARNING");
@@ -154,6 +156,7 @@ public class MainActivity extends Activity {
     private Runnable backgroundAction = new Runnable() {
         @Override
         public void run() {
+            Log.d(TAG, "[tag] background action");
             currentAction = backgroundAction;
         }
     };
@@ -254,7 +257,10 @@ public class MainActivity extends Activity {
                     public void run() {
                         try {
                             final ImageAnalysisService.Tag[] tags = imageAnalysisService.getTag(outputImage);
-                            Log.d(TAG, "Analysis complete: " + tags);
+                            Log.d(TAG, "[tag] Analysis complete: ");
+                            for (ImageAnalysisService.Tag tag : tags) {
+                                Log.d(TAG, "\t[tag] " + tag.toString());
+                            }
 
                             handler.post(new Runnable() {
 
@@ -282,7 +288,7 @@ public class MainActivity extends Activity {
         final int maxTextSize = 42;
         final int minTextSize = 8;
 
-        float maxConfidence = 0;
+        double maxConfidence = 0;
         Runnable actionToTake = null;
         for (ImageAnalysisService.Tag tag : tags) {
             final ActionWrapper actionWrapper = actionMap.get(tag.getTag().toLowerCase());
@@ -294,6 +300,7 @@ public class MainActivity extends Activity {
 
             if (tag.getConfidence() > maxConfidence) {
                 actionToTake = actionWrapper.action;
+                maxConfidence = tag.getConfidence();
             }
         }
 
