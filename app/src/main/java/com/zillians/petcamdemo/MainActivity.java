@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.easycamera.DefaultEasyCamera;
 import com.easycamera.EasyCamera;
@@ -292,6 +293,11 @@ public class MainActivity extends Activity {
         Runnable actionToTake = null;
         for (ImageAnalysisService.Tag tag : tags) {
             final ActionWrapper actionWrapper = actionMap.get(tag.getTag().toLowerCase());
+            if (actionWrapper == null) {
+                Toast.makeText(this, "Wrong tag from server: " + tag.getTag(), Toast.LENGTH_SHORT).show();
+                break;
+            }
+
             final TextView name = actionWrapper.textView;
             float textSize = (float)tag.getConfidence() * maxTextSize;
 
@@ -304,7 +310,9 @@ public class MainActivity extends Activity {
             }
         }
 
-        actionToTake.run();
+        if (actionToTake != null) {
+            actionToTake.run();
+        }
     }
 
     @Override
