@@ -48,6 +48,7 @@ public class MainActivity extends Activity {
     ImageAnalysisService imageAnalysisService = new ImageAnalysisService();
 
     Handler handler;
+    File outputImage ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +75,10 @@ public class MainActivity extends Activity {
         appFolder = new File(Environment.getExternalStorageDirectory(), "petcamdemo");
         if (!appFolder.exists()) {
             appFolder.mkdir();
+        }
+        outputImage = new File(appFolder, "tmp.jpg");
+        if (outputImage.exists()) {
+            outputImage.delete();
         }
     }
 
@@ -146,18 +151,14 @@ public class MainActivity extends Activity {
     private Camera.PreviewCallback cameraPreviewCallback = new Camera.PreviewCallback() {
 
         private long lastTimeCapture = 0;
-        int captureCount = 0;
 
         @Override
         public void onPreviewFrame(byte[] data, Camera camera) {
             long current = System.currentTimeMillis();
 
-            if (current - lastTimeCapture > 2 * 1000) {
+            if (!outputImage.exists()) {
                 lastTimeCapture = current;
                 Log.d(TAG, "Capture data size = " + data.length);
-
-                captureCount++;
-                final File outputImage = new File(appFolder, captureCount + ".jpg");
 
                 writeToJpeg(outputImage, data);
                 executor.submit(new Runnable() {
@@ -166,7 +167,6 @@ public class MainActivity extends Activity {
                     public void run() {
                         try {
                             final ImageAnalysisService.Tag[] tags = imageAnalysisService.getTag(outputImage);
-                            outputImage.delete();
                             Log.d(TAG, "Analysis complete: " + tags);
 
                             handler.post(new Runnable() {
@@ -181,6 +181,9 @@ public class MainActivity extends Activity {
                             e.printStackTrace();
                         } catch (HttpException e) {
                             e.printStackTrace();
+                        } finally {
+                            final boolean result = outputImage.delete();
+                            Log.d(TAG, "delete tmp image result = " + result);
                         }
                     }
                 });
