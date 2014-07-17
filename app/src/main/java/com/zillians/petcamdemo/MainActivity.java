@@ -16,6 +16,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import com.easycamera.DefaultEasyCamera;
@@ -60,6 +63,7 @@ public class MainActivity extends Activity {
 
     Handler handler;
     File outputImage ;
+    TextView alert;
 
     SoundPool soundPool;
     int negativeSound;
@@ -79,6 +83,7 @@ public class MainActivity extends Activity {
         queue = new LinkedBlockingQueue<Runnable>();
         executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, queue);
 
+        alert = (TextView) findViewById(R.id.alert);
         surface = (SurfaceView) findViewById(R.id.preview);
         actionMap.put("meow", new ActionWrapper((TextView) findViewById(R.id.meow), meowAction));
         actionMap.put("chacha", new ActionWrapper((TextView) findViewById(R.id.chacha), chachaAction));
@@ -95,12 +100,36 @@ public class MainActivity extends Activity {
         positiveSound = soundPool.load(this, R.raw.positive, 2);
     }
 
+    private Animation.AnimationListener alertAnimationListener = new Animation.AnimationListener() {
+        @Override
+        public void onAnimationStart(Animation animation) {
+            alert.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void onAnimationEnd(Animation animation) {
+            alert.setVisibility(View.INVISIBLE);
+        }
+
+        @Override
+        public void onAnimationRepeat(Animation animation) {
+
+        }
+    };
+
     private Runnable meowAction = new Runnable() {
         @Override
         public void run() {
             if (currentAction != meowAction) {
                 soundPool.play(positiveSound, 1.0f, 1.0f, 0, 0, 1.0f);
                 currentAction = meowAction;
+
+                alert.setText("PASS");
+                alert.setTextColor(getResources().getColor(android.R.color.holo_blue_bright));
+
+                final Animation animation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.blink);
+                animation.setAnimationListener(alertAnimationListener);
+                alert.startAnimation(animation);
             }
         }
     };
@@ -111,6 +140,13 @@ public class MainActivity extends Activity {
             if (currentAction != chachaAction) {
                 soundPool.play(negativeSound, 1.0f, 1.0f, 0, 0, 1.0f);
                 currentAction = chachaAction;
+
+                alert.setText("WARNING");
+                alert.setTextColor(getResources().getColor(android.R.color.holo_red_light));
+
+                final Animation animation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.blink);
+                animation.setAnimationListener(alertAnimationListener);
+                alert.startAnimation(animation);
             }
         }
     };

@@ -47,4 +47,15 @@
         android:textSize="8sp"
         android:text="Background"/>
 
+    <TextView
+        android:id="@+id/alert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textSize="50sp"
+        android:textColor="@android:color/holo_red_dark"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        android:text="Warning"/>
+
 </RelativeLayout>
