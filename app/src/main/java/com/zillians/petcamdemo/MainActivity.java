@@ -9,7 +9,6 @@ import android.hardware.Camera;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
@@ -163,7 +162,8 @@ public class MainActivity extends Activity {
     };
 
     private void initFolder() {
-        appFolder = new File(Environment.getExternalStorageDirectory(), "petcamdemo");
+//        appFolder = new File(Environment.getExternalStorageDirectory(), "petcamdemo");
+        appFolder = new File("/mnt/usb_storage/USB_DISK0/udisk0", "petcamdemo");
         if (!appFolder.exists()) {
             appFolder.mkdir();
         }
