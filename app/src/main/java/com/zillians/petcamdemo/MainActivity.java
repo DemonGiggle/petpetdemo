@@ -90,7 +90,7 @@ public class MainActivity extends Activity {
         actionMap.put("chacha", new ActionWrapper((TextView) findViewById(R.id.chacha), chachaAction));
         actionMap.put("background", new ActionWrapper((TextView) findViewById(R.id.background), backgroundAction));
 
-        camera = DefaultEasyCamera.open(1);
+        camera = DefaultEasyCamera.open();
 
         surface.getHolder().addCallback(previewCallback);
     }
