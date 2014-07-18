@@ -9,53 +9,37 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <TextView
-        android:id="@+id/meow"
+    <ImageView
+        android:id="@+id/avatar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="20dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:background="@android:color/black"
-        android:textColor="@android:color/white"
-        android:padding="8dp"
-        android:textSize="8sp"
-        android:text="Meow"/>
-
-    <TextView
-        android:id="@+id/chacha"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@id/meow"
-        android:layout_below="@id/meow"
-        android:background="@android:color/black"
-        android:textColor="@android:color/white"
-        android:padding="8dp"
-        android:textSize="8sp"
-        android:text="Cha Cha"/>
-
-    <TextView
-        android:id="@+id/background"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@id/chacha"
-        android:layout_below="@id/chacha"
-        android:background="@android:color/black"
-        android:textColor="@android:color/white"
-        android:padding="8dp"
-        android:textSize="8sp"
-        android:text="Background"/>
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/avatar_nothing"/>
 
     <TextView
         android:id="@+id/alert"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:textSize="60sp"
+        android:textSize="150sp"
         android:textColor="@android:color/holo_red_dark"
         android:textStyle="bold"
         android:visibility="invisible"
         android:text="Warning"/>
+
+    <TextView
+        android:id="@+id/analyzing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="40dp"
+        android:layout_marginLeft="30dp"
+        android:textSize="50sp"
+        android:textColor="@android:color/black"
+        android:text="Analyzing"/>
 
 </RelativeLayout>

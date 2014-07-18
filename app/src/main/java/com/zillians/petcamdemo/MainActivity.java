@@ -18,6 +18,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,22 +39,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-class ActionWrapper {
-    TextView textView;
-    Runnable action;
-
-    ActionWrapper(TextView textView, Runnable action) {
-        this.textView = textView;
-        this.action = action;
-    }
-}
 
 public class MainActivity extends Activity {
     private static final String TAG = "PetcamDemo";
 
     EasyCamera camera;
     SurfaceView surface;
-    Map<String, ActionWrapper> actionMap = new HashMap<String, ActionWrapper>();
+    Map<String, Runnable> actionMap = new HashMap<String, Runnable>();
 
     BlockingQueue<Runnable> queue;
     ThreadPoolExecutor executor;
@@ -64,12 +56,15 @@ public class MainActivity extends Activity {
     Handler handler;
     File outputImage ;
     TextView alert;
+    ImageView avatar;
+    TextView analyzing;
 
     SoundPool soundPool;
     int negativeSound;
     int positiveSound;
 
     Runnable currentAction;
+    int analyzeDotCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,14 +80,32 @@ public class MainActivity extends Activity {
 
         alert = (TextView) findViewById(R.id.alert);
         surface = (SurfaceView) findViewById(R.id.preview);
-        actionMap.put("meow", new ActionWrapper((TextView) findViewById(R.id.meow), meowAction));
-        actionMap.put("chacha", new ActionWrapper((TextView) findViewById(R.id.chacha), chachaAction));
-        actionMap.put("background", new ActionWrapper((TextView) findViewById(R.id.background), backgroundAction));
+        avatar = (ImageView) findViewById(R.id.avatar);
+        analyzing = (TextView) findViewById(R.id.analyzing);
+        actionMap.put("meow", meowAction);
+        actionMap.put("chacha", chachaAction);
+        actionMap.put("background", backgroundAction);
 
+        handler.postDelayed(analyzingAnimation, 500);
         camera = DefaultEasyCamera.open();
 
         surface.getHolder().addCallback(previewCallback);
     }
+
+    private Runnable analyzingAnimation = new Runnable() {
+        @Override
+        public void run() {
+            String text = "Analyzing";
+            final int dotCount = (analyzeDotCount % 4);
+            for (int i = 0; i < dotCount; i++) {
+                text += ".";
+            }
+
+            analyzeDotCount++;
+            analyzing.setText(text);
+            handler.postDelayed(analyzingAnimation, 500);
+        }
+    };
 
     private void initSoundPool() {
         soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 3);
@@ -122,6 +135,8 @@ public class MainActivity extends Activity {
         public void run() {
             if (currentAction != meowAction) {
                 Log.d(TAG, "[tag] meow action");
+                avatar.setImageResource(R.drawable.avatar_meow);
+
                 soundPool.play(positiveSound, 1.0f, 1.0f, 0, 0, 1.0f);
                 currentAction = meowAction;
 
@@ -140,6 +155,8 @@ public class MainActivity extends Activity {
         public void run() {
             if (currentAction != chachaAction) {
                 Log.d(TAG, "[tag] chacha action");
+                avatar.setImageResource(R.drawable.avatar_chacha);
+
                 soundPool.play(negativeSound, 1.0f, 1.0f, 0, 0, 1.5f);
                 currentAction = chachaAction;
 
@@ -158,12 +175,13 @@ public class MainActivity extends Activity {
         public void run() {
             Log.d(TAG, "[tag] background action");
             currentAction = backgroundAction;
+            avatar.setImageResource(R.drawable.avatar_nothing);
         }
     };
 
     private void initFolder() {
 //        appFolder = new File(Environment.getExternalStorageDirectory(), "petcamdemo");
-        appFolder = new File("/mnt/usb_storage/USB_DISK0/udisk0", "petcamdemo");
+        appFolder = new File("/mnt/external_sd", "petcamdemo");
         if (!appFolder.exists()) {
             appFolder.mkdir();
         }
@@ -176,6 +194,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        handler.removeCallbacks(analyzingAnimation);
         queue.clear();
         executor.shutdown();
     }
@@ -241,14 +260,11 @@ public class MainActivity extends Activity {
 
     private Camera.PreviewCallback cameraPreviewCallback = new Camera.PreviewCallback() {
 
-        private long lastTimeCapture = 0;
-
         @Override
         public void onPreviewFrame(byte[] data, Camera camera) {
             long current = System.currentTimeMillis();
 
             if (!outputImage.exists()) {
-                lastTimeCapture = current;
                 Log.d(TAG, "Capture data size = " + data.length);
 
                 writeToJpeg(outputImage, data);
@@ -286,26 +302,17 @@ public class MainActivity extends Activity {
     };
 
     private void updateNameTextView(ImageAnalysisService.Tag[] tags) {
-        final int maxTextSize = 42;
-        final int minTextSize = 8;
-
         double maxConfidence = 0;
         Runnable actionToTake = null;
         for (ImageAnalysisService.Tag tag : tags) {
-            final ActionWrapper actionWrapper = actionMap.get(tag.getTag().toLowerCase());
-            if (actionWrapper == null) {
+            final Runnable action = actionMap.get(tag.getTag().toLowerCase());
+            if (action == null) {
                 Toast.makeText(this, "Wrong tag from server: " + tag.getTag(), Toast.LENGTH_SHORT).show();
                 break;
             }
 
-            final TextView name = actionWrapper.textView;
-            float textSize = (float)tag.getConfidence() * maxTextSize;
-
-            textSize = textSize < minTextSize ? minTextSize : textSize;
-            name.setTextSize(textSize);
-
             if (tag.getConfidence() > maxConfidence) {
-                actionToTake = actionWrapper.action;
+                actionToTake = action;
                 maxConfidence = tag.getConfidence();
             }
         }
