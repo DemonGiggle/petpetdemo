@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class ImageAnalysisService {
     private static final String TAG = "ImageAnalysisService";
-    private static final String IMAGE_ANALYSIS_URL = "http://office.zillians.com:8080/iremember";
+    private static final String IMAGE_ANALYSIS_URL = "http://jarvis.ai";
 
     public class Tag {
         private String tag;
